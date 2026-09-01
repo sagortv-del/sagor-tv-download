@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>সাগর টিভি — লাইভ বাংলা চ্যানেল</title>
+<meta name="description" content="সাগর টিভি — বাংলাদেশি ও ভারতীয় বাংলা চ্যানেল সরাসরি দেখুন। এখনই APK ডাউনলোড করুন।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eef0ec;
+    --ink-dim:#9aa39a;
+    --bg:#0c1210;
+    --bg-raised:#121a17;
+    --line:#22302b;
+    --signal:#e2472b;
+    --signal-dim:#7a2a1e;
+    --tube:#2fae76;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Hind Siliguri', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 24px;}
+
+  /* subtle scanline texture on the whole page */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:repeating-linear-gradient(
+      to bottom, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px,
+      transparent 1px, transparent 3px
+    );
+    pointer-events:none;
+    z-index:1;
+  }
+
+  header{
+    padding:20px 0 0;
+    display:flex; align-items:center; gap:10px;
+  }
+  .dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 0 0 rgba(226,71,43,.6);
+    animation:pulse 1.8s infinite;
+    flex:none;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(226,71,43,.55);}
+    70%{box-shadow:0 0 0 9px rgba(226,71,43,0);}
+    100%{box-shadow:0 0 0 0 rgba(226,71,43,0);}
+  }
+  .chan{
+    font-size:13px; letter-spacing:.04em; color:var(--ink-dim);
+  }
+
+  .hero{padding:64px 0 40px; border-bottom:1px solid var(--line);}
+  h1{
+    font-family:'Tiro Bangla', serif;
+    font-weight:400;
+    font-size:56px;
+    line-height:1.05;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .hero p.lede{
+    font-size:19px;
+    color:var(--ink-dim);
+    max-width:38ch;
+    margin:18px 0 32px;
+  }
+
+  .cta{
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--signal);
+    color:#fff;
+    text-decoration:none;
+    font-weight:600;
+    font-size:17px;
+    padding:14px 22px;
+    border-radius:3px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:hover{background:#c93b23;}
+  .btn svg{width:18px;height:18px;flex:none;}
+  .meta-line{
+    font-size:13px; color:var(--ink-dim);
+  }
+
+  /* channel strip — like a program guide row, doubles as feature list */
+  .guide{
+    padding:44px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .guide h2{
+    font-size:13px;
+    color:var(--tube);
+    letter-spacing:.06em;
+    font-weight:600;
+    margin:0 0 18px;
+  }
+  .row{
+    display:flex; align-items:baseline; gap:16px;
+    padding:14px 0;
+    border-top:1px solid var(--line);
+  }
+  .row:first-of-type{border-top:none;}
+  .row .ch{
+    font-family:'Tiro Bangla', serif;
+    font-size:15px;
+    color:var(--ink-dim);
+    width:2.5ch;
+    flex:none;
+  }
+  .row p{margin:0; font-size:16px;}
+
+  /* install steps */
+  .steps{padding:44px 0;}
+  .steps h2{
+    font-size:13px;
+    color:var(--tube);
+    letter-spacing:.06em;
+    font-weight:600;
+    margin:0 0 22px;
+  }
+  ol{margin:0; padding:0; list-style:none; counter-reset:step;}
+  ol li{
+    counter-increment:step;
+    display:flex; gap:16px;
+    padding:16px 0;
+    border-top:1px solid var(--line);
+  }
+  ol li:first-child{border-top:none;}
+  ol li::before{
+    content:counter(step);
+    font-family:'Tiro Bangla', serif;
+    font-size:20px;
+    color:var(--signal);
+    width:1.4em;
+    flex:none;
+  }
+  ol li p{margin:0; font-size:16px; color:var(--ink);}
+  ol li span{color:var(--ink-dim); font-size:14px; display:block; margin-top:2px;}
+
+  footer{
+    padding:36px 0 60px;
+    color:var(--ink-dim);
+    font-size:13px;
+    border-top:1px solid var(--line);
+  }
+  footer a{color:var(--ink-dim);}
+
+  @media (max-width:480px){
+    h1{font-size:42px;}
+    .hero{padding:48px 0 32px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="dot" aria-hidden="true"></span>
+    <span class="chan">সাগর টিভি · সরাসরি সম্প্রচার</span>
+  </header>
+
+  <section class="hero">
+    <h1>সাগর টিভি</h1>
+    <p class="lede">বাংলাদেশি ও ভারতীয় বাংলা চ্যানেল, একটা অ্যাপে। যেকোনো সময়, সরাসরি ফোনে।</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/sagortv-del/sagor-tv-download/raw/main/app-release.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        APK ডাউনলোড করুন
+      </a>
+    </div>
+    <p class="meta-line" style="margin-top:16px;">Android · ফ্রি · ৮.৮ MB</p>
+  </section>
+
+  <section class="guide">
+    <h2>যা যা পাবেন</h2>
+    <div class="row"><span class="ch">০১</span><p>দেশ-বিদেশের লাইভ বাংলা চ্যানেল</p></div>
+    <div class="row"><span class="ch">০২</span><p>চ্যানেল লিস্ট স্বয়ংক্রিয়ভাবে আপডেট হয়</p></div>
+    <div class="row"><span class="ch">০৩</span><p>সোয়াইপ করে সহজে চ্যানেল বদলানো</p></div>
+  </section>
+
+  <section class="steps">
+    <h2>ইনস্টল করবেন যেভাবে</h2>
+    <ol>
+      <li>
+        <p>উপরের বাটনে ট্যাপ করে APK ফাইলটি ডাউনলোড করুন
+          <span>ব্রাউজার থেকে সরাসরি ডাউনলোড হবে</span>
+        </p>
+      </li>
+      <li>
+        <p>প্রয়োজনে "Unknown sources" ইনস্টলের অনুমতি দিন
+          <span>Settings → Security থেকে, প্রথমবার চাইলে</span>
+        </p>
+      </li>
+      <li>
+        <p>ডাউনলোড হওয়া ফাইলে ট্যাপ করে Install করুন
+          <span>ইনস্টল শেষে অ্যাপ খুলে দেখা শুরু করুন</span>
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    সোর্স ও রিলিজ হিস্টোরি — <a href="https://github.com/sagortv-del/sagor-tv-download">GitHub-এ দেখুন</a>
+  </footer>
+
+</div>
+</body>
+</html>
