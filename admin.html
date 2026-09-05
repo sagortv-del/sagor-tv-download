@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sagor TV - চ্যানেল অ্যাডমিন প্যানেল</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f1115;
+    color: #e8e8e8;
+    margin: 0;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .sub {
+    color: #999;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #1a1d23;
+    border: 1px solid #2a2e37;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #0f1115;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  button {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-primary { background: #3b82f6; color: white; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-danger { background: #ef4444; color: white; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: #22c55e; color: white; }
+  .btn-success:hover { background: #16a34a; }
+  .btn-secondary { background: #333; color: #ddd; }
+  .btn-secondary:hover { background: #444; }
+  .channel-row {
+    background: #14161b;
+    border: 1px solid #2a2e37;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .channel-row input {
+    margin-bottom: 8px;
+  }
+  .row-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .row-actions button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  #status {
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 14px;
+    display: none;
+  }
+  .status-ok { background: #14331f; color: #4ade80; display: block !important; }
+  .status-err { background: #331414; color: #f87171; display: block !important; }
+  .status-loading { background: #1e2530; color: #93c5fd; display: block !important; }
+  .top-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .locked { opacity: 0.4; pointer-events: none; }
+  .hint {
+    font-size: 12px;
+    color: #777;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>📺 Sagor TV — চ্যানেল অ্যাডমিন প্যানেল</h1>
+<div class="sub">চ্যানেল লিস্ট সরাসরি GitHub-এ এডিট করুন — অ্যাপ আপডেট ছাড়াই</div>
+
+<div class="card" id="loginCard">
+  <label>GitHub ইউজারনেম</label>
+  <input type="text" id="owner" placeholder="sagortv-del" value="sagortv-del">
+
+  <label>রিপোজিটরির নাম</label>
+  <input type="text" id="repo" placeholder="sagor-tv-updates" value="sagor-tv-updates">
+
+  <label>ফাইলের পাথ</label>
+  <input type="text" id="filepath" placeholder="channels.m3u" value="channels.m3u">
+
+  <label>Personal Access Token (এটা শুধু আপনার ব্রাউজারে থাকবে, কোথাও পাঠানো হয় না GitHub ছাড়া)</label>
+  <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+  <div class="hint">টোকেন এই ডিভাইসেই সেভ থাকবে (localStorage) যাতে বারবার দিতে না হয়। শেয়ার করা ফোনে এটা ব্যবহার করবেন না।</div>
+
+  <button class="btn-primary" onclick="loadChannels()" style="margin-top:10px;">চ্যানেল লিস্ট লোড করুন</button>
+</div>
+
+<div id="status"></div>
+
+<div id="channelsSection" style="display:none;">
+  <div class="top-actions">
+    <button class="btn-success" onclick="addChannel()">➕ নতুন চ্যানেল</button>
+    <button class="btn-primary" onclick="saveChannels()">💾 সেভ করুন (GitHub-এ পাঠান)</button>
+    <button class="btn-secondary" onclick="loadChannels()">🔄 আবার লোড করুন</button>
+  </div>
+  <div id="channelList"></div>
+</div>
+
+<script>
+let channels = [];
+let currentSha = null;
+
+// পেজ লোড হলে আগের সেভ করা ফর্ম ভ্যালু ফিরিয়ে আনুন
+window.onload = function() {
+  const saved = localStorage.getItem('sagortv_admin_config');
+  if (saved) {
+    const cfg = JSON.parse(saved);
+    document.getElementById('owner').value = cfg.owner || 'sagortv-del';
+    document.getElementById('repo').value = cfg.repo || 'sagor-tv-updates';
+    document.getElementById('filepath').value = cfg.filepath || 'channels.m3u';
+    document.getElementById('token').value = cfg.token || '';
+  }
+};
+
+function saveConfig() {
+  const cfg = {
+    owner: document.getElementById('owner').value.trim(),
+    repo: document.getElementById('repo').value.trim(),
+    filepath: document.getElementById('filepath').value.trim(),
+    token: document.getElementById('token').value.trim()
+  };
+  localStorage.setItem('sagortv_admin_config', JSON.stringify(cfg));
+  return cfg;
+}
+
+function showStatus(message, type) {
+  const el = document.getElementById('status');
+  el.textContent = message;
+  el.className = '';
+  el.classList.add(type === 'ok' ? 'status-ok' : type === 'err' ? 'status-err' : 'status-loading');
+}
+
+function apiUrl(cfg) {
+  return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.filepath}`;
+}
+
+// m3u টেক্সট পার্স করে {name, url} লিস্টে রূপান্তর
+function parseM3U(text) {
+  const lines = text.split('\n').map(l => l.trim());
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('#EXTINF')) {
+      const nameMatch = lines[i].split(',').pop();
+      const name = nameMatch ? nameMatch.trim() : 'নাম নেই';
+      // পরের অ-খালি লাইনটাই URL
+      let j = i + 1;
+      while (j < lines.length && lines[j] === '') j++;
+      const url = lines[j] || '';
+      result.push({ name, url, extinf: lines[i] });
+      i = j;
+    }
+  }
+  return result;
+}
+
+// {name, url} লিস্ট থেকে আবার m3u টেক্সট তৈরি
+function buildM3U(list) {
+  let out = '#EXTM3U\n';
+  list.forEach(ch => {
+    // এক্সট্রা logo/group ইনফো থাকলে বজায় রাখুন, শুধু নাম পার্ট বদলান
+    let extinfLine = ch.extinf || '#EXTINF:-1,' + ch.name;
+    const lastComma = extinfLine.lastIndexOf(',');
+    extinfLine = extinfLine.substring(0, lastComma + 1) + ch.name;
+    out += extinfLine + '\n' + ch.url + '\n\n';
+  });
+  return out;
+}
+
+async function loadChannels() {
+  const cfg = saveConfig();
+  if (!cfg.owner || !cfg.repo || !cfg.filepath || !cfg.token) {
+    showStatus('সব ঘর পূরণ করুন', 'err');
+    return;
+  }
+  showStatus('লোড হচ্ছে...', 'loading');
+  try {
+    const res = await fetch(apiUrl(cfg), {
+      headers: {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showStatus('লোড করতে ব্যর্থ: ' + (err.message || res.status), 'err');
+      return;
+    }
+    const data = await res.json();
+    currentSha = data.sha;
+    const content = decodeURIComponent(escape(atob(data.content)));
+    channels = parseM3U(content);
+    renderChannels();
+    document.getElementById('channelsSection').style.display = 'block';
+    showStatus(`✅ ${channels.length} টি চ্যানেল লোড হয়েছে`, 'ok');
+  } catch (e) {
+    showStatus('এরর: ' + e.message, 'err');
+  }
+}
+
+function renderChannels() {
+  const container = document.getElementById('channelList');
+  container.innerHTML = '';
+  channels.forEach((ch, idx) => {
+    const div = document.createElement('div');
+    div.className = 'channel-row';
+    div.innerHTML = `
+      <label>চ্যানেলের নাম</label>
+      <input type="text" value="${escapeHtml(ch.name)}" onchange="channels[${idx}].name = this.value">
+      <label>স্ট্রিম লিংক (URL)</label>
+      <input type="text" value="${escapeHtml(ch.url)}" onchange="channels[${idx}].url = this.value">
+      <div class="row-actions">
+        <button class="btn-danger" onclick="removeChannel(${idx})">🗑️ মুছুন</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function addChannel() {
+  channels.push({ name: 'নতুন চ্যানেল', url: '', extinf: '#EXTINF:-1,নতুন চ্যানেল' });
+  renderChannels();
+}
+
+function removeChannel(idx) {
+  if (confirm('এই চ্যানেলটি মুছে ফেলতে চান?')) {
+    channels.splice(idx, 1);
+    renderChannels();
+  }
+}
+
+async function saveChannels() {
+  const cfg = saveConfig();
+  if (!currentSha) {
+    showStatus('আগে চ্যানেল লোড করুন', 'err');
+    return;
+  }
+  showStatus('সেভ হচ্ছে...', 'loading');
+  const newContent = buildM3U(channels);
+  const encoded = btoa(unescape(encodeURIComponent(newContent)));
+
+  try {
+    const res = await fetch(apiUrl(cfg), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update channels.m3u via Admin Panel',
+        content: encoded,
+        sha: currentSha
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showStatus('সেভ করতে ব্যর্থ: ' + (err.message || res.status), 'err');
+      return;
+    }
+    const data = await res.json();
+    currentSha = data.content.sha;
+    showStatus('✅ সফলভাবে GitHub-এ সেভ হয়েছে! ব্যবহারকারীরা অ্যাপ খুললেই নতুন চ্যানেল পাবে।', 'ok');
+  } catch (e) {
+    showStatus('এরর: ' + e.message, 'err');
+  }
+}
+</script>
+
+</body>
+</html>
